@@ -195,6 +195,50 @@ void copyToHost(void *hostptr, void *devptr, int bytes)
 void copyDevToDev(void *dstptr, void *srcptr, int bytes)
 {
   hipError_t ierr;
+  const char *mymsg;
+
+  int devs, mydev, myrank;
+  myrank = MPI_Wrapper_world_rank();
+  ierr = hipGetDeviceCount(&devs);
+  if (ierr != hipSuccess) {
+    mymsg = hipGetErrorString(ierr);
+    printf("p[%d] hipGetDeviceCount: %s\n",myrank,mymsg);
+    MPI_Wrapper_abort(0);
+  }
+
+  ierr = hipGetDevice(&mydev);
+  if (ierr != hipSuccess) {
+    mymsg = hipGetErrorString(ierr);
+    printf("p[%d] hipGetDevice: %s\n",myrank,mymsg);
+    MPI_Wrapper_abort(0);
+  }
+
+  printf("rank %d sees %d devices and owns device %d\n", myrank, devs, mydev);
+
+
+  hipPointerAttribute_t src_attr;
+  hipPointerAttribute_t dst_attr;
+  hipError_t  perr = hipPointerGetAttributes(&src_attr, srcptr);
+  if (perr != hipSuccess || src_attr.memoryType != hipMemoryTypeDevice) {
+    printf("p[%d] src pointer is on host\n",myrank);
+  } else if (src_attr.memoryType == hipMemoryTypeDevice)  {
+    printf("p[%d] src pointer is on device %d\n",myrank,src_attr.device);
+  }
+  perr = hipPointerGetAttributes(&dst_attr, dstptr);
+  if (perr != hipSuccess || dst_attr.memoryType != hipMemoryTypeDevice) {
+    printf("p[%d] dst pointer is on host\n",myrank);
+  } else if (dst_attr.memoryType == hipMemoryTypeDevice)  {
+    printf("p[%d] dst pointer is on device %d\n",myrank,dst_attr.device);
+  }
+
+  // if (myrank == 0) {
+  //   hipDeviceEnablePeerAccess(3, 0);
+  // }
+
+  // if (myrank == 3) {
+  //   hipDeviceEnablePeerAccess(0, 0);
+  // }
+
   ierr = hipMemcpy(dstptr, srcptr, bytes, hipMemcpyDeviceToDevice); 
   hipErrCheck(ierr);
   hipDeviceSynchronize();
@@ -217,6 +261,50 @@ void copyDevToDev(void *dstptr, void *srcptr, int bytes)
 void copyPeerToPeer(void *dstptr, int dstID, void *srcptr, int srcID, int bytes)
 {
   hipError_t ierr;
+  const char *mymsg;
+
+  int devs, mydev, myrank;
+  myrank = MPI_Wrapper_world_rank();
+  ierr = hipGetDeviceCount(&devs);
+  if (ierr != hipSuccess) {
+    mymsg = hipGetErrorString(ierr);
+    printf("p[%d] hipGetDeviceCount: %s\n",myrank,mymsg);
+    MPI_Wrapper_abort(0);
+  }
+
+  ierr = hipGetDevice(&mydev);
+  if (ierr != hipSuccess) {
+    mymsg = hipGetErrorString(ierr);
+    printf("p[%d] hipGetDevice: %s\n",myrank,mymsg);
+    MPI_Wrapper_abort(0);
+  }
+
+  printf("rank %d sees %d devices and owns device %d\n", myrank, devs, mydev);
+
+
+  hipPointerAttribute_t src_attr;
+  hipPointerAttribute_t dst_attr;
+  hipError_t  perr = hipPointerGetAttributes(&src_attr, srcptr);
+  if (perr != hipSuccess || src_attr.memoryType != hipMemoryTypeDevice) {
+    printf("p[%d] src pointer is on host\n",myrank);
+  } else if (src_attr.memoryType == hipMemoryTypeDevice)  {
+    printf("p[%d] src pointer is on device %d\n",myrank,src_attr.device);
+  }
+  perr = hipPointerGetAttributes(&dst_attr, dstptr);
+  if (perr != hipSuccess || dst_attr.memoryType != hipMemoryTypeDevice) {
+    printf("p[%d] dst pointer is on host\n",myrank);
+  } else if (dst_attr.memoryType == hipMemoryTypeDevice)  {
+    printf("p[%d] dst pointer is on device %d\n",myrank,dst_attr.device);
+  }
+
+  // if (myrank == 0) {
+  //   hipDeviceEnablePeerAccess(3, 0);
+  // }
+
+  // if (myrank == 3) {
+  //   hipDeviceEnablePeerAccess(0, 0);
+  // }
+
   ierr = hipMemcpyPeer(dstptr,dstID,srcptr,srcID,bytes);
   hipErrCheck(ierr);
   if (ierr != hipSuccess) {
