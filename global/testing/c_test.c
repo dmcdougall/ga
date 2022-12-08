@@ -1786,6 +1786,26 @@ int main(int argc, char **argv) {
 
   MPI_Init(&argc, &argv);
 
+  int myrank, mysize;
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mysize);
+
+  pid_t pid = getpid();
+
+  for (int i = 0; i < mysize; i++) {
+    if (i == myrank) {
+      printf("Rank: %d, pid: %d\n", myrank, pid);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
+
+  if (myrank == 0) {
+    printf("sleeping...\n");
+  }
+  // sleep(45);
+
+
+
 
   MA_init(C_DBL, 2000000, 2000000);
   GA_Initialize();
