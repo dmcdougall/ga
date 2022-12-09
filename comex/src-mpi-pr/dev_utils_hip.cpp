@@ -311,6 +311,7 @@ void copyPeerToPeer(void *dstptr, int dstID, void *srcptr, int srcID, int bytes)
     int err=0;
     int rank = MPI_Wrapper_world_rank();
     const char *msg = hipGetErrorString(ierr);
+    printf("\n\nP2P FAILED\n\n");
     printf("p[%d] hipMemcpyPeer dev to dev msg: %s\n",rank,msg);
     MPI_Wrapper_abort(err);
   }
