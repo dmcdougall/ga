@@ -82,7 +82,7 @@ double tinc;
 double put_bw, get_bw, acc_bw;
 double t_vput;
 
-void test_int_array(int on_device, int local_buf_on_device)
+void test_int_array()
 {
   int g_a;
   int i, j, ii, jj, n, idx;
@@ -130,16 +130,13 @@ void test_int_array(int on_device, int local_buf_on_device)
   /* create a global array and initialize it to zero */
   g_a = NGA_Create_handle();
   NGA_Set_data(g_a, ndim, dims, C_INT);
-  if (!on_device) {
-    NGA_Set_restricted(g_a, list, ndev);
-  }
-  NGA_Set_device(g_a, on_device);
+  NGA_Set_device(g_a, 1);
   NGA_Allocate(g_a);
 
   /* allocate a local buffer and initialize it with values*/
   nsize = (hi[0]-lo[0]+1)*(hi[1]-lo[1]+1);
   set_device(&my_dev);
-  device_malloc(&tbuf,(int)(nsize*sizeof(int)));
+  device_malloc((void**)&tbuf,(int)(nsize*sizeof(int)));
   buf = (int*)tbuf;
 
   for (n=0; n<NLOOP; n++) {
@@ -168,14 +165,10 @@ void test_int_array(int on_device, int local_buf_on_device)
     if (rank == 0 && n == 0) printf("Completed NGA_Distribution\n");
     if (tlo[0]<=thi[0] && tlo[1]<=thi[1]) {
       int tnelem = (thi[0]-tlo[0]+1)*(thi[1]-tlo[1]+1);
-      if (on_device) {
-        tbuf = (int*)malloc(tnelem*sizeof(int));
-        NGA_Access(g_a,tlo,thi,&ptr,&tld);
-        for (i=0; i<tnelem; i++) tbuf[i] = 0;
-        memcpyD2H(tbuf, ptr, tnelem*sizeof(int));
-      } else {
-        NGA_Access(g_a,tlo,thi,&tbuf,&tld);
-      }
+      tbuf = (int*)malloc(tnelem*sizeof(int));
+      NGA_Access(g_a,tlo,thi,&ptr,&tld);
+      for (i=0; i<tnelem; i++) tbuf[i] = 0;
+      memcpyD2H(tbuf, ptr, tnelem*sizeof(int));
       for (ii = tlo[0]; ii<=thi[0]; ii++) {
         i = ii-tlo[0];
         for (jj=tlo[1]; jj<=thi[1]; jj++) {
@@ -184,9 +177,7 @@ void test_int_array(int on_device, int local_buf_on_device)
         }
       }
       NGA_Release(g_a,tlo,thi);
-      if (on_device) {
-        free(tbuf);
-      }
+      free(tbuf);
     }
     GA_Sync();
 
@@ -267,14 +258,6 @@ void test_int_array(int on_device, int local_buf_on_device)
 }
 
 int main(int argc, char **argv) {
-
-  int g_a;
-  double *rbuf;
-  double one_r;
-  double t_sum;
-  int zero = 0;
-  int icnt;
-  int local_buf_on_device;
   int i;
   
   MPI_Init(&argc, &argv);
@@ -285,8 +268,6 @@ int main(int argc, char **argv) {
   rank = GA_Nodeid();   
   // wrank = rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&wrank);
-
-  int nodeid = GA_Cluster_nodeid();
 
   list = (int*)malloc(nprocs*sizeof(int));
   devIDs = (int*)malloc(nprocs*sizeof(int));
@@ -299,7 +280,7 @@ int main(int argc, char **argv) {
      }
   }
 
-  test_int_array(1,1);
+  test_int_array();
 
   free(list);
   free(devIDs);
