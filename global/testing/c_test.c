@@ -258,8 +258,6 @@ void test_int_array()
 }
 
 int main(int argc, char **argv) {
-  int i;
-  
   MPI_Init(&argc, &argv);
   MA_init(C_DBL, 2000000, 2000000);
   GA_Initialize();
@@ -269,23 +267,10 @@ int main(int argc, char **argv) {
   // wrank = rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&wrank);
 
-  list = (int*)malloc(nprocs*sizeof(int));
-  devIDs = (int*)malloc(nprocs*sizeof(int));
-  NGA_Device_host_list(list, devIDs, &ndev, NGA_Pgroup_get_default());
-
-  for (i=0; i<ndev; i++) {
-     if (rank == list[i]) {
-       my_dev = devIDs[i];
-       break;
-     }
-  }
+  my_dev = rank;
 
   test_int_array();
 
-  free(list);
-  free(devIDs);
-  
   GA_Terminate();
-  if (rank == 0) printf("Completed GA terminate\n");
   MPI_Finalize();
 }
