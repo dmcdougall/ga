@@ -157,15 +157,9 @@ void test_int_array(int on_device, int local_buf_on_device)
   int *tbuf;
   int nelem;
   int ld;
-  int g_ok, p_ok, a_ok;
   int *ptr;
   int one;
   double zero = 0.0;
-  int ok;
-
-  p_ok = 1;
-  g_ok = 1;
-  a_ok = 1;
 
   ndim = 2;
   dims[0] = DIMSIZE;
@@ -256,23 +250,12 @@ void test_int_array(int on_device, int local_buf_on_device)
       } else {
         NGA_Access(g_a,tlo,thi,&tbuf,&tld);
       }
-      ok = 1;
       for (ii = tlo[0]; ii<=thi[0]; ii++) {
         i = ii-tlo[0];
         for (jj=tlo[1]; jj<=thi[1]; jj++) {
           j = jj-tlo[1];
           idx = i*tld+j;
-          if (tbuf[idx] != ii*DIMSIZE+jj) {
-            if (ok) printf("p[%d] (%d,%d) (put) expected: %d actual[%d]: %d\n",
-                rank,ii,jj,ii*DIMSIZE+jj,idx,tbuf[idx]);
-            ok = 0;
-          }
         }
-      }
-      if (!ok) {
-        printf("Mismatch found for put on process %d after Put\n",rank);
-      } else if (n==0 && rank==0 && ok) {
-        printf("Access function is okay\n");
       }
       NGA_Release(g_a,tlo,thi);
       if (on_device) {
@@ -307,11 +290,6 @@ void test_int_array(int on_device, int local_buf_on_device)
           for (jj=lo[1]; jj<=hi[1]; jj++) {
             j = jj-lo[1];
             idx = i*ld+j;
-            if (tbuf[idx] != ii*DIMSIZE+jj) {
-              if (g_ok) printf("p[%d] (%d,%d) (get) expected: %d"
-                  " actual[%d]: %d\n",rank,ii,jj,ii*DIMSIZE+jj,idx,tbuf[idx]);
-              g_ok = 0;
-            }
           }
         }
         free(tbuf);
@@ -322,11 +300,6 @@ void test_int_array(int on_device, int local_buf_on_device)
         for (jj = lo[1]; jj<=hi[1]; jj++) {
           j = jj-lo[1];
           idx = i*ld+j;
-          if (buf[idx] != ii*DIMSIZE+jj) {
-            if (g_ok) printf("p[%d] (%d,%d) (get) expected: %d"
-                " actual[%d]: %d\n",rank,ii,jj,ii*DIMSIZE+jj,idx,buf[idx]);
-            g_ok = 0;
-          }
         }
       }
     }
@@ -395,12 +368,6 @@ void test_int_array(int on_device, int local_buf_on_device)
           for (jj=lo[1]; jj<=hi[1]; jj++) {
             j = jj-lo[1];
             idx = i*ld+j;
-            if (tbuf[idx] != 2*(ii*DIMSIZE+jj)) {
-              if (a_ok) printf("p[%d] (%d,%d) (acc) expected: %d"
-                  " actual[%d]: %d device: %d\n",rank,ii,jj,
-                  2*(ii*DIMSIZE+jj),idx,tbuf[idx],on_device);
-              a_ok = 0;
-            }
           }
         }
         free(tbuf);
@@ -411,12 +378,6 @@ void test_int_array(int on_device, int local_buf_on_device)
         for (jj = lo[1]; jj<=hi[1]; jj++) {
           j = jj-lo[1];
           idx = i*ld+j;
-          if (buf[idx] != 2*(ii*DIMSIZE+jj)) {
-            if (a_ok) printf("p[%d] (%d,%d) (acc) expected: %d"
-                " actual[%d]: %d device: %d\n",rank,ii,jj,
-                2*(ii*DIMSIZE+jj),idx,buf[idx],on_device);
-            a_ok = 0;
-          }
         }
       }
     }
@@ -428,17 +389,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     free(buf);
   }
   GA_Destroy(g_a);
-
-  if (!g_ok) {
-    printf("Mismatch found for get on process %d after Get\n",rank);
-  } else {
-    if (rank == 0) printf("Get is okay\n");
-  }
-  if (!a_ok) {
-    printf("Mismatch found on process %d after Acc\n",rank);
-  } else {
-    if (rank == 0) printf("Acc is okay\n");
-  }
 }
 
 int main(int argc, char **argv) {
