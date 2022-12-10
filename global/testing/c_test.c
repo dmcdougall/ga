@@ -139,7 +139,7 @@ int *devIDs;
 int ndev;
 int my_dev;
 
-double tget, tacc, tinc;
+double tinc;
 int get_cnt,put_cnt,acc_cnt;
 double put_bw, get_bw, acc_bw;
 double t_vput;
@@ -164,8 +164,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   double zero = 0.0;
   int ok;
 
-  tget = 0.0;
-  tacc = 0.0;
   put_cnt = 0;
   get_cnt = 0;
   acc_cnt = 0;
@@ -453,10 +451,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   GA_Igop(&put_cnt, 1, "+");
   GA_Igop(&get_cnt, 1, "+");
   GA_Igop(&acc_cnt, 1, "+");
-  GA_Dgop(&tget, 1, "+");
-  GA_Dgop(&tacc, 1, "+");
-  get_bw = (double)(get_cnt*sizeof(int))/tget;
-  acc_bw = (double)(acc_cnt*sizeof(int))/tacc;
 }
 
 int main(int argc, char **argv) {
