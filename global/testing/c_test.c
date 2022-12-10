@@ -140,7 +140,6 @@ int ndev;
 int my_dev;
 
 double tinc;
-int get_cnt,put_cnt,acc_cnt;
 double put_bw, get_bw, acc_bw;
 double t_vput;
 
@@ -164,9 +163,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   double zero = 0.0;
   int ok;
 
-  put_cnt = 0;
-  get_cnt = 0;
-  acc_cnt = 0;
   p_ok = 1;
   g_ok = 1;
   a_ok = 1;
@@ -246,7 +242,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     }
     /* copy data to global array */
     NGA_Put(g_a, lo, hi, buf, &ld);
-    put_cnt += nsize;
     GA_Sync();
     NGA_Distribution(g_a,rank,tlo,thi);
 #if 1
@@ -299,7 +294,6 @@ void test_int_array(int on_device, int local_buf_on_device)
 
     /* copy data from global array to local buffer */
     NGA_Get(g_a, lo, hi, buf, &ld);
-    get_cnt += nsize;
     GA_Sync();
 
     if (local_buf_on_device) {
@@ -367,7 +361,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     /* accumulate data to global array */
     one = 1;
     NGA_Acc(g_a, lo, hi, buf, &ld, &one);
-    acc_cnt += nsize;
     GA_Sync();
     /* reset values in buf */
     if (local_buf_on_device) {
@@ -390,7 +383,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     }
 
     NGA_Get(g_a, lo, hi, buf, &ld);
-    get_cnt += nsize;
     GA_Sync();
     if (local_buf_on_device) {
       if (lo[0]<=hi[0] && lo[1]<=hi[1]) {
@@ -447,10 +439,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   } else {
     if (rank == 0) printf("Acc is okay\n");
   }
-
-  GA_Igop(&put_cnt, 1, "+");
-  GA_Igop(&get_cnt, 1, "+");
-  GA_Igop(&acc_cnt, 1, "+");
 }
 
 int main(int argc, char **argv) {
