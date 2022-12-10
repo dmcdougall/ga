@@ -161,7 +161,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   int g_ok, p_ok, a_ok;
   int *ptr;
   int one;
-  double tbeg;
   double zero = 0.0;
   int ok;
 
@@ -199,7 +198,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   nelem = (hi[0]-lo[0]+1)*(hi[1]-lo[1]+1);
 
   /* create a global array and initialize it to zero */
-  tbeg = GA_Wtime();
   g_a = NGA_Create_handle();
   NGA_Set_data(g_a, ndim, dims, C_INT);
   if (!on_device) {
@@ -220,7 +218,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   }
 
   for (n=0; n<NLOOP; n++) {
-    tbeg = GA_Wtime();
     GA_Zero(g_a);
     GA_Fill(g_a,&zero);
     ld = (hi[1]-lo[1]+1);
@@ -250,12 +247,9 @@ void test_int_array(int on_device, int local_buf_on_device)
       }
     }
     /* copy data to global array */
-    tbeg = GA_Wtime();
     NGA_Put(g_a, lo, hi, buf, &ld);
     put_cnt += nsize;
-    tbeg = GA_Wtime();
     GA_Sync();
-    tbeg = GA_Wtime();
     NGA_Distribution(g_a,rank,tlo,thi);
 #if 1
     if (rank == 0 && n == 0) printf("Completed NGA_Distribution\n");
@@ -292,7 +286,6 @@ void test_int_array(int on_device, int local_buf_on_device)
         free(tbuf);
       }
     }
-    tbeg = GA_Wtime();
     GA_Sync();
 #endif
 
@@ -307,13 +300,10 @@ void test_int_array(int on_device, int local_buf_on_device)
     }
 
     /* copy data from global array to local buffer */
-    tbeg = GA_Wtime();
     NGA_Get(g_a, lo, hi, buf, &ld);
     get_cnt += nsize;
-    tbeg = GA_Wtime();
     GA_Sync();
 
-    tbeg = GA_Wtime();
     if (local_buf_on_device) {
       if (lo[0]<=hi[0] && lo[1]<=hi[1]) {
         int tnelem = (hi[0]-lo[0]+1)*(hi[1]-lo[1]+1);
@@ -378,12 +368,9 @@ void test_int_array(int on_device, int local_buf_on_device)
 
     /* accumulate data to global array */
     one = 1;
-    tbeg = GA_Wtime();
     NGA_Acc(g_a, lo, hi, buf, &ld, &one);
-    tbeg = GA_Wtime();
     acc_cnt += nsize;
     GA_Sync();
-    tbeg = GA_Wtime();
     /* reset values in buf */
     if (local_buf_on_device) {
       if (lo[0]<=hi[0] && lo[1]<=hi[1]) {
@@ -404,12 +391,9 @@ void test_int_array(int on_device, int local_buf_on_device)
       }
     }
 
-    tbeg = GA_Wtime();
     NGA_Get(g_a, lo, hi, buf, &ld);
     get_cnt += nsize;
-    tbeg = GA_Wtime();
     GA_Sync();
-    tbeg = GA_Wtime();
     if (local_buf_on_device) {
       if (lo[0]<=hi[0] && lo[1]<=hi[1]) {
         int tnelem = (hi[0]-lo[0]+1)*(hi[1]-lo[1]+1);
@@ -453,7 +437,6 @@ void test_int_array(int on_device, int local_buf_on_device)
   } else {
     free(buf);
   }
-  tbeg = GA_Wtime();
   GA_Destroy(g_a);
 
   if (!g_ok) {
@@ -484,7 +467,6 @@ int main(int argc, char **argv) {
   double t_sum;
   int zero = 0;
   int icnt;
-  double tbeg;
   int local_buf_on_device;
   int i;
   
