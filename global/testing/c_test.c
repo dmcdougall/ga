@@ -309,7 +309,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     /* copy data from global array to local buffer */
     tbeg = GA_Wtime();
     NGA_Get(g_a, lo, hi, buf, &ld);
-    tget += (GA_Wtime()-tbeg);
     get_cnt += nsize;
     tbeg = GA_Wtime();
     GA_Sync();
@@ -381,7 +380,6 @@ void test_int_array(int on_device, int local_buf_on_device)
     one = 1;
     tbeg = GA_Wtime();
     NGA_Acc(g_a, lo, hi, buf, &ld, &one);
-    tacc += (GA_Wtime()-tbeg);
     tbeg = GA_Wtime();
     acc_cnt += nsize;
     GA_Sync();
@@ -408,7 +406,6 @@ void test_int_array(int on_device, int local_buf_on_device)
 
     tbeg = GA_Wtime();
     NGA_Get(g_a, lo, hi, buf, &ld);
-    tget += (GA_Wtime()-tbeg);
     get_cnt += nsize;
     tbeg = GA_Wtime();
     GA_Sync();
