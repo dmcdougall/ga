@@ -12,10 +12,6 @@
 #include <cuda_runtime.h>
 #endif
 
-/*
-#define BLOCK1 1024*1024
-#define BLOCK1 65536
-*/
 #define BLOCK1 65530
 #define DIMSIZE 2048
 #define SMLDIM 256
@@ -24,54 +20,30 @@
 #define NLOOP 10
 
 void set_device(int* devid) {
-  #if defined(ENABLE_CUDA)
-  cudaSetDevice(*devid);
-  #elif defined(ENABLE_HIP)
   hipSetDevice(*devid);
-  #endif    
 }
 
 void device_malloc(void **buf, size_t bsize){
-  #if defined(ENABLE_CUDA)
-  cudaMalloc(buf, bsize);
-  #elif defined(ENABLE_HIP)
   hipMalloc(buf, bsize);
-  #endif    
 }
 
 void memcpyH2D(void* dbuf, void* sbuf, size_t bsize){
-  #if defined(ENABLE_CUDA)
-  cudaMemcpy(dbuf, sbuf, bsize, cudaMemcpyHostToDevice);
-  cudaDeviceSynchronize();
-  #elif defined(ENABLE_HIP)
   hipMemcpy(dbuf, sbuf, bsize, hipMemcpyHostToDevice);
   hipDeviceSynchronize();
-  #endif    
 }
 
 void memcpyD2H(void* dbuf, void* sbuf, size_t bsize){
-  #if defined(ENABLE_CUDA)
-  cudaMemcpy(dbuf, sbuf, bsize, cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
-  #elif defined(ENABLE_HIP)
   hipMemcpy(dbuf, sbuf, bsize, hipMemcpyDeviceToHost);
   hipDeviceSynchronize();
-  #endif    
 }
 
 void device_free(void *buf) {
-  #if defined(ENABLE_CUDA)
-  cudaFree(buf);
-  #elif defined(ENABLE_HIP)
   hipFree(buf);
-  #endif   
 }
 
 
-//int nprocs, rank, wrank;
-int nprocs, rank;
+int rank;
 int pdx, pdy;
-int wrank;
 
 int *list;
 int *devIDs;
@@ -262,11 +234,7 @@ int main(int argc, char **argv) {
   MA_init(C_DBL, 2000000, 2000000);
   GA_Initialize();
 
-  nprocs = GA_Nnodes();  
   rank = GA_Nodeid();   
-  // wrank = rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&wrank);
-
   my_dev = rank;
 
   test_int_array();
